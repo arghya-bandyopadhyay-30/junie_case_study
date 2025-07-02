@@ -444,10 +444,11 @@ class AWSQDeveloperTransform(Action):
 
                 <!-- Change 2: Concurrency Change -->
                 <div class="p-6 bg-gray-800 rounded-lg h-full flex flex-col">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-red-400">Change 2: Sequential to Concurrent Processing</h3>
-                    <p class="text-center text-gray-400 mb-6 flex-grow">The AI correctly followed the guideline to use `asyncio.gather`, but in doing so, it changed the program's behavior from processing PDFs one-by-one to processing them all at once. This could cause resource exhaustion.</p>
-                    <p class="code-header">Original: Sequential `for` loop</p>
-                    <div class="code-block mb-4">
+    <h3 class="text-2xl font-bold text-center mb-4 text-green-400">Change 2: Performance Boost with Parallel Processing</h3>
+    <p class="text-center text-gray-400 mb-6 flex-grow">The AI identified a key performance bottleneck. By upgrading the one-by-one `for` loop to a concurrent `asyncio.gather`, it enabled parallel processing of multiple PDFs, dramatically reducing the total execution time for I/O-bound tasks.</p>
+    
+    <p class="code-header">Original: Sequential `for` loop</p>
+    <div class="code-block mb-4">
 <pre><code># Processes one PDF at a time
 for pdf_path in potential_pdf_paths:
     try:
@@ -455,23 +456,24 @@ for pdf_path in potential_pdf_paths:
         enriched_nodes.append(enriched_node)
     except Exception as e:
         continue</code></pre>
-                    </div>
+    </div>
 
-                    <p class="code-header">AI Refactored: Concurrent `asyncio.gather`</p>
-                    <div class="code-block">
-<pre><code># Processes ALL PDFs at once
+    <p class="code-header">AI Refactored: Concurrent `asyncio.gather`</p>
+    <div class="code-block">
+<pre><code># Processes ALL PDFs in parallel for max speed
 async def _enriched_nodes_generator(...):
-    return await <span class="bug-highlight">asyncio.gather</span>(*[
+    return await <span class="good-highlight">asyncio.gather</span>(*[
         self._process_content_pair(node, pdf_path, content, ...)
         for node, pdf_path, content in pdf_content_pairs
     ])</code></pre>
-                    </div>
-                    <div class="mt-6">
-                        <p class="font-semibold text-white">The Critical Difference:</p>
-                        <p class="text-gray-400">- <strong class="text-green-400">Original:</strong> Safe, sequential processing ensures low, predictable memory and CPU usage.</p>
-                        <p class="text-gray-400">- <strong class="text-red-400">Refactored:</strong> Concurrent processing could lead to out-of-memory errors or CPU spikes if many large PDFs are processed simultaneously, a risk the original code did not have.</p>
-                    </div>
-                </div>
+    </div>
+    
+    <div class="mt-6">
+        <p class="font-semibold text-white">The Performance Advantage:</p>
+        <p class="text-gray-400">- <strong class="text-yellow-400">Original:</strong> Processed PDFs one by one, which was slow and inefficient for multiple files.</p>
+        <p class="text-gray-400">- <strong class="text-green-400">Refactored:</strong> Processes all PDFs in parallel, drastically cutting down the wait time and improving throughput.</p>
+    </div>
+</div>
             </div>
         </section>
 
