@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study: Human vs. AI Code Refactoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark background */
+            color: #F9FAFB; /* Light text */
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #34d399, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card {
+            background-color: #1F2937;
+            border-left-width: 4px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.1), 0 4px 6px -2px rgba(56, 189, 248, 0.05);
+        }
+        .table-container {
+            overflow-x: auto;
+            background-color: #1F2937;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        th, td {
+            border: 1px solid #374151;
+            padding: 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #374151;
+            color: #a78bfa;
+            font-weight: 700;
+        }
+        .verdict-ai {
+            color: #34d399;
+            font-weight: 600;
+        }
+        .verdict-manual {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        .verdict-draw {
+            color: #9ca3af;
+            font-weight: 600;
+        }
+        .code-block {
+            background-color: #0d1117;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: #c9d1d9;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+            white-space: pre-wrap;
+        }
+        .code-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #a78bfa;
+        }
+        .guideline-list {
+            list-style-type: decimal;
+            list-style-position: inside;
+        }
+        .guideline-list li {
+            margin-bottom: 1rem;
+        }
+        .guideline-list ul {
+            list-style-type: disc;
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+        }
+        .journey-card {
+            background-color: #1F2937;
+            border: 1px solid #374151;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        .journey-card img {
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #4b5563;
+        }
+        .journey-card-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .bug-highlight, .violation-highlight {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-left: 3px solid #ef4444;
+            padding: 0.1rem 0.3rem;
+            border-radius: 2px;
+        }
+        .good-highlight {
+            background-color: rgba(52, 211, 153, 0.2);
+            border-left: 3px solid #34d399;
+            padding: 0.1rem 0.3rem;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <header class="text-center my-16">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">
+                <span class="gradient-text">The AI Refactoring Revolution</span>
+            </h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-400 max-w-4xl mx-auto">
+                A case study on proactively leveraging AI agents for recurring code review and refactoring, significantly reducing manual effort for small-to-medium changes, and enhancing overall code quality.
+            </p>
+        </header>
+
+        <section id="opportunity" class="my-20">
+             <h2 class="text-3xl font-bold text-center mb-8">The Opportunity: Automating Code Refactoring</h2>
+            <p class="text-center text-gray-400 max-w-3xl mx-auto mb-12">
+                Instead of daily manual code reviews and refactorings, our team explored how an LLM-powered AI agent could automate these recurring tasks, allowing human developers to focus on architectural and complex changes.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                <div class="stat-card border-yellow-400 p-8 rounded-lg text-center">
+                    <p class="text-7xl font-black text-white">268</p>
+                    <p class="mt-2 text-lg text-gray-300">Total Lines of Code Refactored</p>
+                </div>
+                <div class="stat-card border-blue-400 p-8 rounded-lg text-center">
+                    <p class="text-7xl font-black text-white">200+</p>
+                    <p class="mt-2 text-lg text-gray-300">Lines in the Monolithic Function</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="code-violations" class="my-24">
+    <h2 class="text-3xl font-bold text-center mb-12">Why Refactor? Analyzing the Original Code</h2>
+
+    <div class="bg-gray-800 rounded-lg p-8 shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:items-start">
+            
+            <div class="lg:col-span-3">
+                <p class="code-header font-bold">Original Code (`aws_q_developer_transform.py`)</p>
+                <div class="code-block text-xs">
+<pre><code>import <span class="violation-highlight">os</span>
+import uuid
+from typing import Optional
+
+from langchain_community.document_loaders import PyPDFLoader
+# ... (imports)
+
+class AWSQDeveloperTransform(Action):
+    # ... (__init__)
+
+    async def run(
+        self,
+        nodes: list[BaseCodeConciseNode],
+        # ... (args)
+    ) -> Optional[list[EnrichedNode]]:
+        cc_litellm_wrapper = TokenTrackingCCLiteLLMWrapper(...)
+        <span class="violation-highlight">enriched_nodes = []</span>
+
+        <span class="violation-highlight">for node in nodes:</span>
+            node_name = node.display_name
+            potential_pdf_paths = self._find_matching_pdfs(node_name)
+
+            <span class="violation-highlight">for pdf_path in potential_pdf_paths:</span>
+                try:
+                    loader = PyPDFLoader(pdf_path)
+                    pages = loader.lazy_load()
+
+                    <span class="violation-highlight">for document in pages:</span>
+                        embeddings = await cc_litellm_wrapper.generate_embeddings(...)
+                        enriched_node = CodeSummary(
+                            # ... (CodeSummary args)
+                            display_name=f"{<span class="violation-highlight">os.path.basename(pdf_path)</span>} - {node_name}",
+                            # ...
+                        )
+                        <span class="violation-highlight">enriched_nodes.append(enriched_node)</span>
+                except Exception as e:
+                    <span class="violation-highlight">print(f"Error processing PDF {pdf_path}: {str(e)}")</span>
+                    continue
+
+        return enriched_nodes
+
+    def _find_matching_pdfs(self, node_name: str) -> list[str]:
+        matching_pdfs = []
+        if not <span class="violation-highlight">os.path.exists(self.pdf_directory)</span>:
+            <span class="violation-highlight">print(f"PDF directory {self.pdf_directory} does not exist")</span>
+            return matching_pdfs
+
+        for root, _, files in <span class="violation-highlight">os.walk(self.pdf_directory)</span>:
+            for filename in files:
+                if filename.lower().endswith(".pdf"):
+                    # ... (logic)
+                    full_path = <span class="violation-highlight">os.path.join(root, filename)</span>
+                    matching_pdfs.append(full_path)
+        return matching_pdfs
+    # ... (post_processing)
+</code></pre>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <h3 class="text-xl font-bold mb-4 text-white">Guideline Violations</h3>
+                <ul class="space-y-4 text-gray-300">
+                    <li>
+                        <strong class="font-semibold text-red-400">Infrastructure Abstraction</strong>
+                        <p class="text-sm mt-1">Directly uses the `os` module (`os.path.exists`, `os.walk`, etc.) instead of the mandated `CCFileSystem` abstraction.</p>
+                    </li>
+                    <li>
+                        <strong class="font-semibold text-red-400">Functional Programming</strong>
+                        <p class="text-sm mt-1">Relies on `for` loops and mutates state with `enriched_nodes.append()` instead of using immutable patterns and comprehensions.</p>
+                    </li>
+                    <li>
+                        <strong class="font-semibold text-red-400">Logging</strong>
+                        <p class="text-sm mt-1">Uses `print()` for error messages and status updates instead of a structured, injected `logger`.</p>
+                    </li>
+                     <li>
+                        <strong class="font-semibold text-red-400">Single Responsibility</strong>
+                        <p class="text-sm mt-1">The `run` method is monolithic, handling file discovery, I/O, data processing, and error handling all in one place, making it difficult to test and maintain.</p>
+                    </li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+        <section id="challenge" class="my-20">
+    <h2 class="text-3xl font-bold text-center mb-8">The Challenge: A Strict Refactoring Task</h2>
+    <p class="text-center text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
+        A manual, Test-Driven Development (TDD) refactoring process was pitted against an autonomous AI agent (<span class="font-semibold text-green-400">Junie, powered by Sonnet 3.7</span>). Both were tasked with refactoring the same Python module, <code class="px-2 py-1 text-sm bg-gray-900/70 text-amber-300 rounded-md border border-gray-700">aws_q_developer_transform.py</code>, according to a strict set of advanced architectural guidelines.
+    </p>
+    <div class="p-8 bg-gray-800 rounded-lg shadow-2xl max-w-5xl mx-auto">
+        <h3 class="text-2xl font-bold text-center mb-8 text-white">Mandatory Guidelines</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 transform hover:scale-105 hover:border-violet-500 transition-all duration-300">
+                <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10m ദു's an SVG path for a refresh icon which visually represents functional concepts like mapping and reducing. It is not a complete SVG tag. It should be used within an SVG tag with the appropriate attributes. It is not a complete SVG tag. It is an SVG path."></path></svg>
+                    <h4 class="text-lg font-bold text-white">Functional Programming</h4>
+                </div>
+                <ul class="space-y-2 text-gray-400 text-sm list-disc list-inside">
+                    <li>Absolutely no mutable operations: `append`, `+=`, etc.</li>
+                    <li>Must use comprehensions, `map`, `filter`, and `asyncio.gather()`.</li>
+                    <li>Functions should be pure and side-effect free.</li>
+                </ul>
+            </div>
+
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 transform hover:scale-105 hover:border-violet-500 transition-all duration-300">
+                <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                    <h4 class="text-lg font-bold text-white">SOLID Principles</h4>
+                </div>
+                <ul class="space-y-2 text-gray-400 text-sm list-disc list-inside">
+                    <li>Single Responsibility Principle (SRP) is mandatory.</li>
+                    <li>Inject all dependencies; no globals or hardcoded calls.</li>
+                    <li>Code should be open for extension, closed for modification.</li>
+                </ul>
+            </div>
+
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 transform hover:scale-105 hover:border-violet-500 transition-all duration-300">
+                <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.8 15.2a2 2 0 01-2-2v-1a2 2 0 00-2-2H2" /></svg>
+                    <h4 class="text-lg font-bold text-white">Infrastructure Abstraction</h4>
+                </div>
+                <ul class="space-y-2 text-gray-400 text-sm list-disc list-inside">
+                    <li>Replace all direct `os`/`pathlib` calls with `CCFileSystem`.</li>
+                    <li>Replace all `print()` calls with a structured `logger`.</li>
+                </ul>
+            </div>
+
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 transform hover:scale-105 hover:border-violet-500 transition-all duration-300">
+                <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    <h4 class="text-lg font-bold text-white">Code Hygiene</h4>
+                </div>
+                <ul class="space-y-2 text-gray-400 text-sm list-disc list-inside">
+                    <li>No inline comments unless absolutely required.</li>
+                    <li>Keep docstrings only at the class level.</li>
+                    <li>Use `ALL_CAPS_CONSTANTS` for all literals.</li>
+                </ul>
+            </div>
+            
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 transform hover:scale-105 hover:border-violet-500 transition-all duration-300">
+                 <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" /></svg>
+                    <h4 class="text-lg font-bold text-white">Naming & Design Patterns</h4>
+                </div>
+                <ul class="space-y-2 text-gray-400 text-sm list-disc list-inside">
+                    <li>Use names that represent roles, not actions (e.g., `resolver`).</li>
+                    <li>Employ Strategy, Factory, or Adapter patterns when warranted.</li>
+                </ul>
+            </div>
+
+            <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-700 transform hover:scale-105 hover:border-violet-500 transition-all duration-300">
+                <div class="flex items-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h4 class="text-lg font-bold text-white">Testing Requirements</h4>
+                </div>
+                <ul class="space-y-2 text-gray-400 text-sm list-disc list-inside">
+                    <li>Use `unittest.TestCase` or `pytest`.</li>
+                    <li>Follow Arrange-Act-Assert (AAA) strictly.</li>
+                    <li>Coverage must be 100%; CI must pass.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+        <section id="transformation-journey" class="my-24">
+            <h2 class="text-3xl font-bold text-center mb-12">The AI's Transformation Journey</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                <!-- Step 1 -->
+                <div class="journey-card">
+                    <img src="assets/Processing 1.png" alt="AI Initial Setup" class="w-full h-auto object-cover">
+                    <div class="journey-card-content">
+                        <p class="font-bold text-lg text-white">1. Initial Setup</p>
+                        <p class="text-gray-400 text-sm mt-2">The AI was provided with the original Python file and a markdown file containing strict refactoring instructions.</p>
+                    </div>
+                </div>
+                <!-- Step 2 -->
+                <div class="journey-card">
+                    <img src="assets/Processing 2.png" alt="AI Planning and Execution" class="w-full h-auto object-cover">
+                     <div class="journey-card-content">
+                        <p class="font-bold text-lg text-white">2. Planning & Execution</p>
+                        <p class="text-gray-400 text-sm mt-2">The AI generated a step-by-step plan, searched the codebase, and methodically refactored the code and tests.</p>
+                    </div>
+                </div>
+                <!-- Step 3 -->
+                <div class="journey-card">
+                    <img src="assets/Processing 3.png" alt="AI Completion" class="w-full h-auto object-cover">
+                    <div class="journey-card-content">
+                        <p class="font-bold text-lg text-white">3. Completion</p>
+                        <p class="text-gray-400 text-sm mt-2">The process concluded with a summary of the changed files, confirming 100% test coverage and successful implementation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="architectural-shift" class="my-12">
+            <h2 class="text-3xl font-bold text-center mb-12 text-white">Architectural Shift: From Monolith to Modular</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+                <!-- "Before" column -->
+                <div class="p-6 bg-gray-800 rounded-lg flex flex-col">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-red-400">Before</h3>
+                    <p class="text-center text-gray-400 mb-6">A single large `run` method handled all logic: finding files, loading content, generating embeddings, and creating nodes. This made the code hard to test and maintain.</p>
+                    <div class="flex-grow bg-red-900/30 border-2 border-dashed border-red-500 rounded-lg p-8 flex flex-col items-center justify-center">
+                        <span class="text-xl font-semibold text-red-300">AWSQDeveloperTransform</span>
+                        <div class="max-w-md w-full">
+                            <div class="bg-red-900/30 mt-4 p-4 border border-red-500 rounded-lg text-left w-full">
+                                <p class="text-lg font-bold text-red-200">run()</p>
+                                <p class="text-sm text-gray-400 pl-4 mt-2">- Find matching PDFs</p>
+                                <p class="text-sm text-gray-400 pl-4">- Load PDF content</p>
+                                <p class="text-sm text-gray-400 pl-4">- Generate embeddings</p>
+                                <p class="text-sm text-gray-400 pl-4">- Create enriched nodes</p>
+                                <p class="text-sm text-gray-400 pl-4">- Handle errors</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- "After" column -->
+                <div class="p-6 bg-gray-800 rounded-lg flex flex-col">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-green-400">After</h3>
+                    <p class="text-center text-gray-400 mb-6">The logic was decomposed into multiple small, focused functions. The `run` method now orchestrates these components, promoting a clean separation of concerns.</p>
+                    <div class="flex-grow grid grid-cols-2 gap-4 content-center">
+                        <div class="bg-green-900/30 border border-green-500 rounded p-3 flex items-center justify-center text-center text-green-200 text-sm">_node_pdf_pairs_generator</div>
+                        <div class="bg-green-900/30 border border-green-500 rounded p-3 flex items-center justify-center text-center text-green-200 text-sm">_pdf_content_extractor</div>
+                        <div class="bg-green-900/30 border border-green-500 rounded p-3 flex items-center justify-center text-center text-green-200 text-sm">_enriched_nodes_generator</div>
+                        <div class="bg-green-900/30 border border-green-500 rounded p-3 flex items-center justify-center text-center text-green-200 text-sm">_safe_pdf_loader</div>
+                        <div class="bg-green-900/30 border border-green-500 rounded p-3 flex items-center justify-center text-center text-green-200 text-sm">_process_content_pair</div>
+                        <div class="bg-green-900/30 border border-green-500 rounded p-3 flex items-center justify-center text-center text-green-200 text-sm">_vector_index_creator</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="critical-bugs" class="my-24">
+            <h2 class="text-3xl font-bold text-center mb-12">Detailed Analysis: Critical Architectural Changes by AI</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <!-- Change 1: Functional Decomposition -->
+                <div class="p-6 bg-gray-800 rounded-lg h-full flex flex-col">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-sky-400">Change 1: Monolithic Loop to Functional Decomposition</h3>
+                    <p class="text-center text-gray-400 mb-6 flex-grow">The AI broke down a large, monolithic `run` method into a series of small, pure functions, each with a single responsibility. This dramatically improves readability and testability.</p>
+                    
+                    <p class="code-header">Original Monolithic `run` Method:</p>
+                    <div class="code-block mb-4">
+<pre><code>async def run(self, ...):
+    cc_litellm_wrapper = TokenTrackingCCLiteLLMWrapper(...)
+    enriched_nodes = []
+    for node in nodes:
+        node_name = node.display_name
+        potential_pdf_paths = self._find_matching_pdfs(node_name)
+        for pdf_path in potential_pdf_paths:
+            try:
+                loader = PyPDFLoader(pdf_path)
+                pages = loader.lazy_load()
+                for document in pages:
+                    embeddings = await cc_litellm_wrapper.generate_embeddings(...)
+                    enriched_node = CodeSummary(...)
+                    enriched_nodes.append(enriched_node)
+            except Exception as e:
+                print(f"Error processing PDF {pdf_path}: {str(e)}")
+                continue
+    return enriched_nodes</code></pre>
+                    </div>
+
+                    <p class="code-header">AI Refactored Orchestrator `run` Method:</p>
+                    <div class="code-block">
+<pre><code>async def run(self, ...):
+    cc_litellm_wrapper = TokenTrackingCCLiteLLMWrapper(...)
+    node_pdf_pairs = self._node_pdf_pairs_generator(nodes)
+    pdf_content_pairs = self._pdf_content_extractor(node_pdf_pairs)
+    enriched_nodes_nested = await self._enriched_nodes_generator(
+        pdf_content_pairs, cc_litellm_wrapper
+    )
+    return [node for sublist in enriched_nodes_nested for node in sublist]</code></pre>
+                    </div>
+                </div>
+
+                <!-- Change 2: Concurrency Change -->
+                <div class="p-6 bg-gray-800 rounded-lg h-full flex flex-col">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-red-400">Change 2: Sequential to Concurrent Processing</h3>
+                    <p class="text-center text-gray-400 mb-6 flex-grow">The AI correctly followed the guideline to use `asyncio.gather`, but in doing so, it changed the program's behavior from processing PDFs one-by-one to processing them all at once. This could cause resource exhaustion.</p>
+                    <p class="code-header">Original: Sequential `for` loop</p>
+                    <div class="code-block mb-4">
+<pre><code># Processes one PDF at a time
+for pdf_path in potential_pdf_paths:
+    try:
+        # ... load and process single PDF
+        enriched_nodes.append(enriched_node)
+    except Exception as e:
+        continue</code></pre>
+                    </div>
+
+                    <p class="code-header">AI Refactored: Concurrent `asyncio.gather`</p>
+                    <div class="code-block">
+<pre><code># Processes ALL PDFs at once
+async def _enriched_nodes_generator(...):
+    return await <span class="bug-highlight">asyncio.gather</span>(*[
+        self._process_content_pair(node, pdf_path, content, ...)
+        for node, pdf_path, content in pdf_content_pairs
+    ])</code></pre>
+                    </div>
+                    <div class="mt-6">
+                        <p class="font-semibold text-white">The Critical Difference:</p>
+                        <p class="text-gray-400">- <strong class="text-green-400">Original:</strong> Safe, sequential processing ensures low, predictable memory and CPU usage.</p>
+                        <p class="text-gray-400">- <strong class="text-red-400">Refactored:</strong> Concurrent processing could lead to out-of-memory errors or CPU spikes if many large PDFs are processed simultaneously, a risk the original code did not have.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="outcomes" class="my-24">
+    <h2 class="text-3xl font-bold text-center mb-12">Quantifiable Outcomes: Speed & Quality</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+        
+        <div class="flex flex-col justify-center">
+            <h3 class="text-2xl font-bold text-center mb-8">The Test Coverage Journey</h3>
+            <div class="flex items-center justify-center space-x-4 md:space-x-8">
+                <div class="stat-card border-yellow-400 p-6 rounded-lg shadow-xl text-center w-48">
+                    <p class="text-6xl font-black text-yellow-400">85%</p>
+                    <p class="mt-2 text-lg text-gray-300">Initial Coverage</p>
+                </div>
+                <div class="text-5xl font-thin text-gray-500 animate-pulse">&rarr;</div>
+                <div class="stat-card border-green-400 p-6 rounded-lg shadow-xl text-center w-48">
+                    <p class="text-6xl font-black text-green-400">100%</p>
+                    <p class="mt-2 text-lg text-gray-300">Final Coverage</p>
+                </div>
+            </div>
+            <p class="text-center text-gray-400 mt-8">Both refactoring efforts successfully increased test coverage from a baseline of 85% to a complete 100%.</p>
+        </div>
+
+        <div class="flex flex-col justify-center md:pl-12 md:border-l md:border-gray-700">
+            <h3 class="text-2xl font-bold text-center mb-8">The Test Suite Expansion</h3>
+            <div class="flex items-center justify-center space-x-4 md:space-x-8">
+                <div class="stat-card border-yellow-400 p-6 rounded-lg shadow-xl text-center w-48">
+                    <p class="text-6xl font-black text-yellow-400">1</p>
+                    <p class="mt-2 text-lg text-gray-300">Initial Test</p>
+                </div>
+                <div class="text-5xl font-thin text-gray-500 animate-pulse">&rarr;</div>
+                <div class="stat-card border-green-400 p-6 rounded-lg shadow-xl text-center w-48">
+                    <p class="text-6xl font-black text-green-400">9</p>
+                    <p class="mt-2 text-lg text-gray-300">Final Tests</p>
+                </div>
+            </div>
+            <p class="text-center text-gray-400 mt-8">The initial, single test was replaced by nine granular tests, ensuring each function was individually validated.</p>
+        </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div class="h-[400px] bg-gray-800 p-6 rounded-lg shadow-2xl">
+            <canvas id="timeTakenChart"></canvas>
+        </div>
+        <div class="h-[400px] bg-gray-800 p-6 rounded-lg shadow-2xl">
+            <canvas id="testCoverageChart"></canvas>
+        </div>
+    </div>
+</section>
+
+        <section id="architecture-table" class="my-24">
+            <h2 class="text-3xl font-bold text-center mb-12">Architectural Transformation: Before vs. After</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Before: Original Code</th>
+                            <th>After: Refactored by Human & AI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold">Test Coverage</td>
+                            <td><span class="text-yellow-400">85%</span> (8 missing statements)</td>
+                            <td><span class="text-green-400 font-bold">100%</span></td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Dependencies</td>
+                            <td>Hardcoded `os` calls and `print` statements.</td>
+                            <td>Fully injected dependencies (`CCFileSystem`, `logger`).</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Programming Style</td>
+                            <td>Mutable operations (`append`) and standard loops.</td>
+                            <td>Immutable patterns, list comprehensions, and `asyncio.gather`.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Testing</td>
+                            <td>A single test file with partial coverage.</td>
+                            <td>Comprehensive test suites covering all new functions and edge cases.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section id="comparison" class="my-24">
+            <h2 class="text-3xl font-bold text-center mb-12">Brutally Honest Head-to-Head Comparison</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Manual Refactoring (Human)</th>
+                            <th>AI Agent Refactoring (Junie)</th>
+                            <th>Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Time Taken</td>
+                            <td>50 – 60 mins (TDD)</td>
+                            <td>3 – 6 mins (+2 min test fix)</td>
+                            <td class="verdict-ai">AI Agent</td>
+                        </tr>
+                        <tr>
+                            <td>Functional Programming</td>
+                            <td>Strong adherence</td>
+                            <td>Strong adherence</td>
+                            <td class="verdict-draw">Draw</td>
+                        </tr>
+                        <tr>
+                            <td>SOLID Principles</td>
+                            <td>Maintained and applied via constructor</td>
+                            <td>Maintained and applied via constructor</td>
+                            <td class="verdict-draw">Draw</td>
+                        </tr>
+                        <tr>
+                            <td>Code Hygiene</td>
+                            <td>Minimal & precise docstrings, no unused imports</td>
+                            <td>Verbose comments in tests, some unused imports initially</td>
+                            <td class="verdict-manual">Manual</td>
+                        </tr>
+                        <tr>
+                            <td>Testing Requirements</td>
+                            <td>Created and updated tests, all passed</td>
+                            <td>Created and updated; 2 tests initially failed, but were fixed after re-tasking</td>
+                            <td class="verdict-ai">AI (after fix)</td>
+                        </tr>
+                        <tr>
+                            <td>Final Output Quality</td>
+                            <td>Fully compliant with all rules</td>
+                            <td>Fully compliant after minor test fix</td>
+                            <td class="verdict-draw">Draw</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="verdict" class="my-24">
+            <h2 class="text-3xl font-bold text-center mb-12">The Verdict: A New Paradigm of Collaboration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg">
+                <div class="bg-gray-800 p-8 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-white">AI Agent Strengths</h3>
+                    <p class="text-gray-300">Excels at <span class="text-green-400">speed, systematic application of rules, and tireless execution</span>. It delivered a fully refactored and tested module in a fraction of the time a human developer required.</p>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-white">Human Developer Strengths</h3>
+                    <p class="text-gray-300">Excels at <span class="text-yellow-400">nuance and context</span>. The manual approach was slightly more precise in areas like code comments and import management from the start.</p>
+                </div>
+            </div>
+            <div class="mt-12 bg-indigo-900/30 border border-indigo-500 p-8 rounded-lg text-center max-w-4xl mx-auto">
+                 <h3 class="text-2xl font-bold mb-4">Bottom Line for Stakeholders: "AI for Implementation, Human for Direction"</h3>
+                 <p class="text-gray-300 text-lg mb-4">The AI agent performs complex, rule-based refactoring tasks over <span class="font-bold text-white">90% faster</span> than a skilled developer, while achieving the same high quality standards. The need for a minor, human-guided correction on its generated tests underscores the ideal workflow.</p>
+                 <ol class="list-decimal list-inside text-left space-y-2 text-gray-300 text-lg max-w-2xl mx-auto">
+                     <li><span class="font-semibold text-white">Human:</span> Defines requirements and architectural vision.</li>
+                     <li><span class="font-semibold text-white">AI Agent:</span> Executes systematic implementation and test generation.</li>
+                     <li><span class="font-semibold text-white">Human:</span> Performs a final review for business context and validation.</li>
+                 </ol>
+            </div>
+        </section>
+
+        <footer class="text-center mt-16 mb-8">
+            <p class="text-gray-500">This case study demonstrates the powerful potential of guided AI to accelerate development and improve code quality.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const chartFontColor = '#F9FAFB';
+        const gridColor = 'rgba(255, 255, 255, 0.1)';
+
+        // Chart 1: Time Taken
+        if (document.getElementById('timeTakenChart')) {
+            new Chart(document.getElementById('timeTakenChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Manual Refactoring', 'AI Agent'],
+                    datasets: [{
+                        label: 'Time Taken (minutes)',
+                        data: [55, 8], // Using mid-point for manual, and total for AI
+                        backgroundColor: ['#fbbf24', '#34d399'],
+                        borderColor: ['#d97706', '#047857'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: chartFontColor, font: { weight: '500' } },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: { color: chartFontColor, font: { size: 14, weight: '600' } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Refactoring Time Comparison',
+                            color: chartFontColor,
+                            font: { size: 18, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart 2: Test Coverage Comparison
+        if (document.getElementById('testCoverageChart')) {
+            new Chart(document.getElementById('testCoverageChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Original Code', 'Manual Refactor', 'AI Agent (Junie)'],
+                    datasets: [{
+                        label: 'Test Coverage',
+                        data: [85, 100, 100],
+                        backgroundColor: [
+                            '#60a5fa', // Blue for Original
+                            '#fbbf24', // Yellow for Manual
+                            '#34d399'  // Green for AI
+                        ],
+                        borderColor: [
+                            '#2563eb',
+                            '#d97706',
+                            '#047857'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100, // Give a little space at the top
+                            ticks: {
+                                color: chartFontColor,
+                                font: { weight: '500' },
+                                callback: value => value + '%'
+                            },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: {
+                                color: chartFontColor,
+                                font: { size: 14, weight: '600' }
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // No legend needed for single dataset
+                        },
+                        title: {
+                            display: true,
+                            text: 'Final Test Coverage Comparison',
+                            color: chartFontColor,
+                            font: { size: 18, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
