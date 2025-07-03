@@ -526,6 +526,99 @@ async def _enriched_nodes_generator(...):
     </div>
 </section>
 
+<section id="testing-transformation" class="my-24">
+    <h2 class="text-3xl font-bold text-center mb-12 text-white">From Monolith to Modules: A Testing Transformation</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        
+        <div class="p-6 bg-gray-800 rounded-lg h-full">
+            <h3 class="text-2xl font-bold text-center mb-4 text-yellow-400">Before: Single High-Level Test</h3>
+            <p class="text-center text-gray-400 mb-6 text-sm">A single test targeted the main `run` method, leaving helper functions, edge cases, and post-processing logic vulnerable and untested.</p>
+            
+            <div class="space-y-3">
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">Monolithic `run()` method</p>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded-full">1 Test</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                      <div class="bg-gradient-to-r from-green-500 to-yellow-500 h-2.5 rounded-full" style="width: 85%"></div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-900/50 p-3 rounded-lg opacity-60">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">`_find_matching_pdfs()`</p>
+                        <span class="text-xs font-bold text-red-400 bg-red-900/50 px-2 py-1 rounded-full">Untested</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                      <div class="bg-red-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900/50 p-3 rounded-lg opacity-60">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">`post_processing()`</p>
+                        <span class="text-xs font-bold text-red-400 bg-red-900/50 px-2 py-1 rounded-full">Untested</span>
+                    </div>
+                     <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+                      <div class="bg-red-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg h-full">
+            <h3 class="text-2xl font-bold text-center mb-4 text-green-400">After: Granular & Comprehensive</h3>
+            <p class="text-center text-gray-400 mb-6 text-sm">The code was decomposed into testable units. Nine distinct tests now provide 100% coverage across all modules, including helpers and error handling.</p>
+
+            <div class="space-y-3">
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">Main `run()` Orchestrator</p>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded-full">1 Test</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2"><div class="bg-green-500 h-2.5 rounded-full w-full"></div></div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">File System & Matching</p>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded-full">2 Tests</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2"><div class="bg-green-500 h-2.5 rounded-full w-full"></div></div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">PDF Loading & Safety</p>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded-full">2 Tests</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2"><div class="bg-green-500 h-2.5 rounded-full w-full"></div></div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">Content Processing</p>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded-full">1 Test</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2"><div class="bg-green-500 h-2.5 rounded-full w-full"></div></div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">Database Indexing</p>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded-full">1 Test</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2"><div class="bg-green-500 h-2.5 rounded-full w-full"></div></div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-300">Initialization & Edge Cases</p>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded-full">2 Tests</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2"><div class="bg-green-500 h-2.5 rounded-full w-full"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
         <section id="architecture-table" class="my-24">
             <h2 class="text-3xl font-bold text-center mb-12">Architectural Transformation: Before vs. After</h2>
             <div class="table-container">
